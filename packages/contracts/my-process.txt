@@ -2,3 +2,4 @@ installations
 1. Openzeppelin; forge install OpenZeppelin/openzeppelin-contracts
 2. chainlink; forge install smartcontractkit/chainlink !!! Chainlink is heavy, trim off excess before production
 3. solmate; forge install transmissions11/solmate (for FixedPointMathLib)
+

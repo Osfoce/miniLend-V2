@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 // import {Script} from "forge-std/Script.sol";
-// import {MockUsdt} from "../src/contracts/MockUsdt.sol";
-// import {MiniLend} from "../src/contracts/MiniLend.sol";
+// import {MockUsdt} from "../test/invariant/mocks/MockERC20.sol";
+// import {MiniLend} from "../src/MiniLend.sol";
 
 // contract Deploy is Script {
 //     function run() external returns (MiniLend, MockUsdt) {
