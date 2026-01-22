@@ -2,9 +2,9 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {MiniLend} from "../src/contracts/MiniLend.sol";
-import {MockERC20} from "./mocks/MockERC20.sol";
-import {MockAggregator} from "./mocks/MockAggregator.sol";
+import {MiniLend} from "../src/MiniLend.sol";
+import {MockERC20} from "./invariant/mocks/MockERC20.sol";
+import {MockAggregator} from "./invariant/mocks/MockAggregator.sol";
 
 contract MiniLendTest is Test {
     MiniLend lend;

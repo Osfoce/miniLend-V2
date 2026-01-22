@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {MiniLend} from "../../src/contracts/MiniLend.sol";
+import {MiniLend} from "../../../src/MiniLend.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract MiniLendHandler is Test {

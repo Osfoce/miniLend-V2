@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
-import "../../src/contracts/MiniLend.sol";
-import "./handlers/MiniLendHandler.sol";
-import "./mocks/MockERC20.sol";
-import "./mocks/MockAggregator.sol";
+import {Test} from "forge-std/Test.sol";
+import {MiniLend} from "../../src/MiniLend.sol";
+import {MiniLendHandler} from "./handlers/MiniLendHandler.sol";
+import {MockERC20} from "./mocks/MockERC20.sol";
+import {MockAggregator} from "./mocks/MockAggregator.sol";
 
 contract MiniLendInvariant is Test {
     MiniLend public miniLend;
@@ -67,7 +67,7 @@ contract MiniLendInvariant is Test {
             totalDebt += debt;
         }
 
-        uint256 balance = IERC20(mockToken).balanceOf(address(miniLend));
+        uint256 balance = MockERC20(mockToken).balanceOf(address(miniLend));
         assert(balance >= totalDebt);
     }
 }
