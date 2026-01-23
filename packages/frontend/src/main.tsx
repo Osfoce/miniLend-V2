@@ -9,9 +9,11 @@ import './index.css'
 const queryClient = new QueryClient()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <WagmiProvider config={wagmiConfig}>
-    <QueryClientProvider client={queryClient}>
+  <React.StrictMode>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
       <App />
-    </QueryClientProvider>
-  </WagmiProvider>
+     </QueryClientProvider>
+    </WagmiProvider>
+  </React.StrictMode>
 )

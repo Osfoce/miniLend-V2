@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 // import {Script} from "forge-std/Script.sol";
-// import {MockUsdt} from "../test/invariant/mocks/MockERC20.sol";
+// import {MockERC20} from "../test/invariant/mocks/MockERC20.sol";
 // import {MiniLend} from "../src/MiniLend.sol";
 
 // contract Deploy is Script {

@@ -1,3 +1,7 @@
+import { useState } from 'react'
+import { parseEther } from 'viem'
+import {useWriteContract} from 'wagmi'
+
 interface WithdrawProps {
 collateralEth: number;
 maxWithdrawEth: number;
