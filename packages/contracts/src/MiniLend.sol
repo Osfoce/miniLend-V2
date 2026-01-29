@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -13,6 +14,7 @@ import "./events.sol";
 
 contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
     using FixedPointMathLib for uint256;
+    using SafeERC20 for IERC20;
 
     /* ============ Structs ============ */
     struct User {
@@ -587,14 +589,7 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
         /*//////////////////////////////////////////////////////////////
                 5. EFFECTS + INTERACTIONS
         //////////////////////////////////////////////////////////////*/
-
-        if (
-            !IERC20(user.debtAsset).transferFrom(
-                msg.sender,
-                address(this),
-                actualRepay
-            )
-        ) revert TransferFailed(user.debtAsset, msg.sender, actualRepay);
+        _sendToken(user.debtAsset, address(this), actualRepay);
 
         user.debtAmount -= actualRepay;
 
@@ -651,6 +646,10 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
         address token
     ) internal view returns (bool) {
         return (users[user].debtAsset == token);
+    }
+
+    function _sendToken(address token, address to, uint256 amount) internal {
+        IERC20(token).safeTransferFrom(msg.sender, to, amount);
     }
 
     function _sendEth(address to, uint256 amount) internal {
