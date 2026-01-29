@@ -8,53 +8,11 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {FixedPointMathLib} from "@solmate/src/utils/FixedPointMathLib.sol";
+import "./error.sol";
+import "./events.sol";
 
 contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
     using FixedPointMathLib for uint256;
-
-    /* ============ Errors ============ */
-    error TransferFailed(address token, address sender, uint256 amount);
-    error TokenTransferFailed(address token, address to, uint256 amount);
-    error BorrowLimitExceeded(uint256 amount, uint256 availableToBorrow);
-    error OverPaymentNotSupported(uint256 amountPaid, uint256 expectedAmount);
-    error NotEnoughCollateral(uint256 collateralBalance, uint256 userInput);
-    error InvalidAsset(address asset);
-    error BorrowedAmountNotFullyRepaid(uint256 balance);
-    error TokenAlreadyApproved(address token);
-    error TokenNotApproved(address token);
-    error InvalidPriceData(int256 price);
-    error InsufficientPoolBalance(uint256 poolBalance, uint256 requestedAmount);
-    error InvalidAddress(address addr);
-    error FeedDataNotFinalized();
-    error StalePriceData(uint256 data);
-    error NoCollateralProvided();
-    error InsufficientCollateral();
-    error InsufficientEthBalance();
-    error InvalidDecimals();
-    error BadBonus(uint256 bonus);
-    error InvalidCloseFactor();
-    error InvalidAmount();
-    error PositionHealthy();
-    error NoActivePosition();
-    error Badltv(uint256 ltv);
-
-    /* ============ Events ============ */
-    event ltvUpdated(uint256 newltv);
-    event BonusUpdated(uint256 newBonus);
-    event TokenRevoked(address indexed token);
-    event NewTokenApproved(address indexed token);
-    event PriceFeedUpdated(address indexed token, address indexed feed);
-    event MockUsdtAddressUpdated(address newAddress);
-    event EthStaked(address indexed user, uint256 ethAmount);
-    event USDRepaid(address indexed user, uint256 usdAmount);
-    event USDBorrowed(address indexed user, uint256 usdAmount);
-    event ETHCollateralWithdrawn(address indexed user, uint256 amount);
-    event Liquidation(
-        address indexed liquidator,
-        address indexed borrower,
-        uint256 repayAmount,
-        uint256 seizedCollateral
-    );
 
     /* ============ Structs ============ */
     struct User {
@@ -114,14 +72,14 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
         address feed
     ) external onlyOwner nonZeroAddress(token) nonZeroAddress(feed) {
         priceFeeds[token] = feed;
-        emit PriceFeedUpdated(token, feed);
+        emit minilendEvent.PriceFeedUpdated(token, feed);
     }
 
     function setltv(uint256 _ltv) external onlyOwner nonZeroAmount(_ltv) {
         if (_ltv == 0 || _ltv > PCT_DENOMINATOR || _ltv > LIQUIDATION_THRESHOLD)
             revert Badltv(_ltv);
         ltv = _ltv;
-        emit ltvUpdated(_ltv);
+        emit minilendEvent.ltvUpdated(_ltv);
     }
 
     function setLiquidationBonus(
@@ -129,7 +87,7 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
     ) external onlyOwner nonZeroAmount(_bonus) {
         if (_bonus > PCT_DENOMINATOR) revert BadBonus(_bonus);
         liquidationBonus = _bonus;
-        emit BonusUpdated(_bonus);
+        emit minilendEvent.BonusUpdated(_bonus);
     }
 
     function approveToken(
@@ -141,7 +99,7 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
         tokenIndex[token] = approvedTokenList.length;
         approvedTokenList.push(token);
 
-        emit NewTokenApproved(token);
+        emit minilendEvent.NewTokenApproved(token);
     }
 
     function revokeTokenApproval(
@@ -164,7 +122,7 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
 
         approvedTokenList.pop();
         delete tokenIndex[token];
-        emit TokenRevoked(token);
+        emit minilendEvent.TokenRevoked(token);
     }
 
     // ========== Public view Functions ============
@@ -295,7 +253,7 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
         User storage user = _user(msg.sender);
         user.stakedAmount += msg.value;
         user.stakedAsset = ETH_ADDRESS;
-        emit EthStaked(msg.sender, msg.value);
+        emit minilendEvent.EthStaked(msg.sender, msg.value);
     }
 
     /**
@@ -355,7 +313,7 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
         // Transfer logic
         _poolTransfer(token, msg.sender, amount);
 
-        emit USDBorrowed(msg.sender, amount);
+        emit minilendEvent.USDBorrowed(msg.sender, amount);
     }
 
     /**
@@ -439,7 +397,7 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
             user.debtAsset = address(0);
         }
 
-        emit USDRepaid(msg.sender, repayUsdValue);
+        emit minilendEvent.USDRepaid(msg.sender, repayUsdValue);
     }
 
     /**
@@ -493,7 +451,7 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
             _clearPosition(msg.sender);
         }
 
-        emit ETHCollateralWithdrawn(msg.sender, amount);
+        emit minilendEvent.ETHCollateralWithdrawn(msg.sender, amount);
     }
 
     /**
@@ -650,7 +608,12 @@ contract MiniLend is ReentrancyGuard, Ownable(msg.sender) {
             _clearPosition(borrower);
         }
 
-        emit Liquidation(msg.sender, borrower, actualRepay, seizableAmount);
+        emit minilendEvent.Liquidation(
+            msg.sender,
+            borrower,
+            actualRepay,
+            seizableAmount
+        );
     }
 
     // ============ Internal helper Functions ============
